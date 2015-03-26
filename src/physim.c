@@ -1,51 +1,67 @@
+#include <string.h>
+#include <ctype.h>
 #include "physim.h"
 
-//finds string str in file fp, returns location
-fpos_t findstr(FILE *fp, char *str) {
-	fpos_t strloc = NULL;
-	char c;
-	int nlct = 0, len = 0;
 
-	while ((c = str[len++]) != '\0');
-	while ((c = getc(fp)) != EOF) {
-		if (c == '\n')
-			nlct++;
+//finds string str in file fp, returns location
+int findstr(FILE *fp, char *str, fpos_t *strloc) {
+	char c;
+	int len = 0, i = 0, ret_val = 1;	// ret_val: 1 = notfound, 2 = found
+
+	len = strlen(str);
+	while ((c = fgetc(fp)) != EOF) {
+		if (c == '#') {			// ignore comments
+			while (c != '\n')
+				c = fgetc(fp);
+			c = fgetc(fp);
+		}
 		if (c == str[0]) {
-			strloc = ftell(fp);
-			for (int i = 1; i < len; i++) {
-				if ((c = getc(fp)) == str[i])
-					continue;
-				else {
-					strloc = NULL;
+			for (i = 1; i < len; i++) {
+				if ((c = fgetc(fp)) == str[i]) {
+					if (i == len - 1) {
+						fgetpos(fp, strloc);
+						strloc->__pos -= len;
+						ret_val = 0;
+						break;
+					}
+				} else {
+					ret_val = 1;
 					break;
 				}
 			}
-			if (i = len - 1 && strloc != NULL)
+			if (ret_val = 0)
 				break;
 		}
 	}
-	return strloc;
+	return ret_val;
 }
+
 //reads either double type for mass or integer type for nforces from file fp
-void readval(FILE *fp, char *str, void *var) {
+void readval(FILE *fp, char *str, vals *var) {
 	int i = 0;
 	char temp[64], c;
-	fpos_t strloc = findstr(fp, str);
-	if (strloc == NULL) {
-		printf("Error: missing argument: %s", str);
+	fpos_t strloc;
+	if (findstr(fp, str, &strloc) != 0) {
+		printf("Error: missing argument: %s\n", str);
 		exit(EXIT_FAILURE);
 	}
-	fsetpos(fp, strloc);
-	while (isdigit(c = getc(fp) || c == '.')
-		 temp[i++] = c;
-	temp[i + 1] = '\0';
-	if (str[0] == 'm')
-		*var = atof(temp);
-	else if (str[0] == 'f')
-		*var = atoi(temp);
+	while (c != EOF)		// eat rest of file after previous readval use
+		c = fgetc(fp);
+	fsetpos(fp, &strloc);
+	while (c != '\n') {		// read chars into temp char array
+		if (isdigit((c = getc(fp))) || c == '.')
+			temp[i++] = c;
+	}
+	temp[i + 1] = '\0';		// make temp a string to convert
+	if (str[0] == 'f')		// for nforces
+		var->intgr = atoi(temp);
+	if (str[0] == 'm')		// for mass
+		var->dbl =  atof(temp);
+	rewind(fp);
 }
+/*
 //reads numeric values on line line in file fp into vector structure vect
-void vectorread(FILE *fp, fpos_t loc, vector *vect) {
+void vectorread(FILE *fp, fpos_t loc, struct vector *vect) {
 	char c, lf, val1[32], *val2[32];
 	double x, y;
 	int i = 0, 1negflag, 2negflag;
@@ -87,6 +103,7 @@ void vectorread(FILE *fp, fpos_t loc, vector *vect) {
 	vect->cmpnt.y = atof(val2);
 	//force times?
 }
+
 //reads nforces amount of forces into array of force forces[] from file fp
 void sforces(FILE *fp, const int nforces, force forces[]) {
 	fpos_t forcesloc = findstr("forces: %s\n	");
@@ -103,13 +120,16 @@ void sforces(FILE *fp, const int nforces, force forces[]) {
 }
 //may be replaced by two vectorreads in main()
 void swindow(FILE *fp, vector window[2]) {
-	fpos_t winloc = findstr(fp, "window: ");
+	fpos_t winloc;
+
+	findstr(fp, "window", &winloc);
 	for (int i = 0; i < 2; i++)
 		vectorread(fp, winloc, window[i]);
 }
 //may be replaced by a vectorread in main()
 void stime(FILE *fp, vector *time) {
-	fpos_t tloc = findstr(fp, "time: ");
+	fpos_t tloc;
+	findstr(fp, "time", &tloc);
 	vectorread(fp, tloc, time);
 }
 //applies nforces amount of forces in array of force forces[] onto vectors in objects[], turning a force into a position using the newton's second law
@@ -131,3 +151,4 @@ void applyforces(const unsigned int nforces, const force forces[], vector object
 void writegraph(const vector objects[], const vector window[2], const vector *time) {
 
 }
+*/
