@@ -11,7 +11,10 @@
 *		- vectorread()
 *		- sforces(), swindow(), stime(), applyforces
 *	- write writegraph()
+*	- include initial position and velocity options
 *	- include "auto" option for window
+*	- include time-interval forces, e.g. "<10,21> 0-200" or
+*					     "<0,-9.81> always"
 *	- thorough error handling and reporting
 */
 
