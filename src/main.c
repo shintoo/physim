@@ -7,8 +7,12 @@
 *	from an easily written file.
 * ------------------------------------------------
 * TODO:
-*	- Write the writegraph function
 *	- fix what doesnt work
+*		- vectorread()
+*		- sforces(), swindow(), stime(), applyforces
+*	- write writegraph()
+*	- include "auto" option for window
+*	- thorough error handling and reporting
 */
 
 
