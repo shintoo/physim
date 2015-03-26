@@ -30,17 +30,17 @@ int main(int argc, int *argv[]) {
 	char outs[20];
 	int nforces;
 	double mass;
-	union vals nfms; 
-	readval(fin, "forces:", &nfms);
-	readval(fin, "mass:", &nfms);
+	union vals nfms;
+	struct vector time;
+	struct vector window[2];
+	readval(fin, "forces", &nfms);
 	nforces = nfms.intgr;
+	readval(fin, "mass", &nfms);
 	mass = nfms.mass;
-	force forces[nforces];
-	struct vector time;			//.x = begin time, .y = end time
-	struct vector window[2];		// bottom left and top right window values <x,y>
-	stime(fp, &time)		// reads time from file into time structure (begin, end)
+	struct force forces[nforces];
+	stime(fp, &time)
 	struct vector object[time.y - time.x]	// declares array of object structures with an amount of members
-					// equal to range of time
+						// equal to range of time
 	swindow(fin, window)		// reads window size (botleft, topright) from file into window
 	sforces(fin, nforces, forces);	//reads forces from file into array of force structures
 	applyforces(forces, object, &time);
