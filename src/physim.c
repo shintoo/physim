@@ -59,7 +59,7 @@ void readval(FILE *fp, char *str, vals *var) {
 		var->dbl =  atof(temp);
 	rewind(fp);
 }
-/*
+
 //reads numeric values on line line in file fp into vector structure vect
 void vectorread(FILE *fp, fpos_t loc, struct vector *vect) {
 	char c, lf, val1[32], *val2[32];
@@ -151,4 +151,3 @@ void applyforces(const unsigned int nforces, const force forces[], vector object
 void writegraph(const vector objects[], const vector window[2], const vector *time) {
 
 }
-*/
