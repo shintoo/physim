@@ -1,6 +1,6 @@
 mass:	37.25		# mass of object
 time:	<0,100>		# time interval
-forces: 19		# number of forces
+forces: 3		# number of forces
 	<60,30> 0	# values of force vector and time applied, i.e. <x,y> t
 	<30,60> 35
 	<-90,-90> 85
