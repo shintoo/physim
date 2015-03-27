@@ -41,8 +41,10 @@ int main(int argc, int *argv[]) {
 	struct vector time;
 	struct vector window[2];
 	readval(fin, "forces", &nfms);
+	rewind(fin)l
 	nforces = nfms.intgr;
 	readval(fin, "mass", &nfms);
+	rewind(fin);
 	mass = nfms.mass;
 	struct force forces[nforces];
 	stime(fp, &time)

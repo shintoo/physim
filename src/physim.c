@@ -1,5 +1,7 @@
 #include <string.h>
+#include <stdio.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include "physim.h"
 
 
@@ -61,14 +63,13 @@ void readval(FILE *fp, char *str, vals *var) {
 }
 
 //reads numeric values on line line in file fp into vector structure vect
-void vectorread(FILE *fp, fpos_t loc, struct vector *vect) {
-	char c, lf, val1[32], *val2[32];
-	double x, y;
-	int i = 0, 1negflag, 2negflag;
+void vectorread(FILE *fp, fpos_t *loc, struct vector *vect) {
+	char c, val1[32], val2[32];
+	int i = 0, xnegflag = 0, ynegflag = 0, nlct = 0;;
 
 	fsetpos(fp, loc);
 	i = 0;
-	while ((c = getc(fp)) != EOF) {
+	while ((c = fgetc(fp)) != EOF) {
 		if (c == '<')
 			break;
 	}
@@ -77,7 +78,7 @@ void vectorread(FILE *fp, fpos_t loc, struct vector *vect) {
 		exit (EXIT_FAILURE);
 	}
 	if ((c = getc(fp)) == '-')
-		1negflag = 1;
+		xnegflag = 1;
 	else
 		val1[i++] = c;
 	while (isdigit(c = getc(fp)) || c == '.')
@@ -89,7 +90,7 @@ void vectorread(FILE *fp, fpos_t loc, struct vector *vect) {
 	val1[++i] = '\0';
 	i = 0;
 	if ((c = getc(fp)) == '-')
-		2negflag = 1;
+		ynegflag = 1;
 	else
 		val2[i++] = c;
 	while (isdigit(c = getc(fp)) || c == '.')
@@ -99,9 +100,12 @@ void vectorread(FILE *fp, fpos_t loc, struct vector *vect) {
 		exit(EXIT_FAILURE);
 	}
 	val2[++i] = '\0';
-	vect->cmpnt.x = atof(val1);
-	vect->cmpnt.y = atof(val2);
-	//force times?
+	vect->x = atof(val1);
+	vect->y = atof(val2);
+	if (xnegflag == 1)
+		vect->x *= -1;
+	if (ynegflag == 1)
+		vect->y *= -1;
 }
 
 //reads nforces amount of forces into array of force forces[] from file fp
@@ -151,3 +155,4 @@ void applyforces(const unsigned int nforces, const force forces[], vector object
 void writegraph(const vector objects[], const vector window[2], const vector *time) {
 
 }
+
