@@ -1,7 +1,3 @@
-#include <string.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <stdlib.h>
 #include "physim.h"
 
 
@@ -74,29 +70,33 @@ void vectorread(FILE *fp, fpos_t *loc, struct vector *vect) {
 			break;
 	}
 	if (c != '<') {
-		puts("Error: No vector found: use format <x,y>");
+		puts("Error: No vector found: use format <x,y>\n"
+		"Error ID: 74\n");
 		exit (EXIT_FAILURE);
 	}
-	if ((c = getc(fp)) == '-')
+	if ((c = fgetc(fp)) == '-')
 		xnegflag = 1;
 	else
 		val1[i++] = c;
-	while (isdigit(c = getc(fp)) || c == '.')
+	while (isdigit(c = fgetc(fp)) || c == '.')
 		val1[i++] = c;
 	if (c != ',') {
-		puts("Error reading vector: expecting ',' between values.");
+		puts("\nError reading vector: expecting ',' between values.\n"
+		"Error ID: 83\n");
 		exit(EXIT_FAILURE);
 	}
-	val1[++i] = '\0';
+	val1[i] = '\0';
 	i = 0;
 	if ((c = getc(fp)) == '-')
 		ynegflag = 1;
 	else
 		val2[i++] = c;
-	while (isdigit(c = getc(fp)) || c == '.')
+	while (isdigit(c = fgetc(fp)) || c == '.') {
 		val2[i++] = c;
+	}
 	if (c != '>') {
-		puts("Error reading vector: expecting '>'. use format <x,y>");
+		puts("\nError reading vector: expecting '>'. use format <x,y>\n"
+		"Error ID: 96\n");
 		exit(EXIT_FAILURE);
 	}
 	val2[++i] = '\0';
@@ -109,37 +109,55 @@ void vectorread(FILE *fp, fpos_t *loc, struct vector *vect) {
 }
 
 //reads nforces amount of forces into array of force forces[] from file fp
-void sforces(FILE *fp, const int nforces, force forces[]) {
-	fpos_t forcesloc = findstr("forces: %s\n	");
-	char time[16], c;
+void sforces(FILE *fp, const int nforces, struct force forces[]) {
+	fpos_t floc;
+	char temp[16], c;
+	int tempi;
 
-	for (int i = 0; i < nforces, i++) {
-		vectorread(fp, forcesloc, forces[i]);
-		c = getc(fp);		// move forward 1/skip space
-		while ((c = getc(fp)) != '\n' && i < 16)
-			temp[i++] = c;
-		forces[i].time = atoi(time);
-		forcesloc = ftell(fp);
+	findstr(fp, "forces", &floc);
+	fsetpos(fp, &floc);
+	puts("sforces:");
+	for (int i = 0; i < nforces; i++) {
+//		tempi = 0;
+//		vectorread(fp, &floc, &(forces[i].cmpnt));
+		c = fgetc(fp);
+//		while ((c = fgetc(fp)) != '\n' && i < 15)
+//			temp[tempi++] = c;
+//		forces[i].time = atoi(temp);
+		while (c != '\n')
+			c = fgetc(fp);
+		c = fgetc(fp);
+		fgetpos(fp, &floc);
 	}
 }
+
 //may be replaced by two vectorreads in main()
-void swindow(FILE *fp, vector window[2]) {
+void swindow(FILE *fp, struct vector window[2]) {
 	fpos_t winloc;
+	char c;
 
 	findstr(fp, "window", &winloc);
-	for (int i = 0; i < 2; i++)
-		vectorread(fp, winloc, window[i]);
+	fsetpos(fp, &winloc);
+	for (int i = 0; i < 2; i++) {
+		vectorread(fp, &winloc, &(window[i]));
+		while (c != '\n')
+			c = fgetc(fp);
+		c = fgetc(fp);
+		fgetpos(fp, &winloc);
+	}
 }
+
 //may be replaced by a vectorread in main()
-void stime(FILE *fp, vector *time) {
+void stime(FILE *fp, struct vector *time) {
 	fpos_t tloc;
 	findstr(fp, "time", &tloc);
-	vectorread(fp, tloc, time);
+	vectorread(fp, &tloc, time);
 }
+/*
 //applies nforces amount of forces in array of force forces[] onto vectors in objects[], turning a force into a position using the newton's second law
-void applyforces(const unsigned int nforces, const force forces[], vector objects[], const double mass, const vector *time) {
-	unsigned int frcct = 0;
-	vector acc, vel;
+void applyforces(const unsigned int nforces, const force forces[], struct vector objects[], const double mass, const vector *time) {
+	int frcct = 0;
+	struct vector acc, vel;
 	
 	for (int i = time->x; i <= time->y; i++) {
 		if (i == forces[frcct].time) {
@@ -155,4 +173,4 @@ void applyforces(const unsigned int nforces, const force forces[], vector object
 void writegraph(const vector objects[], const vector window[2], const vector *time) {
 
 }
-
+*/
