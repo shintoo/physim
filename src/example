@@ -1,8 +1,0 @@
-mass:	37.25		# mass of object
-time:	<0,100>		# time interval
-forces: 3		# number of forces
-	<57.9,89> 0	# values of force vector and time applied, i.e. <x,y> t
-	<2,5> 35
-	<-900,62.65> 85
-window: <0,0>		# window range, bottom left coordinate
-	<120, 135>	# top right coordinate
