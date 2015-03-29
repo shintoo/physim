@@ -51,13 +51,17 @@ int main(int argc, char *argv[]) {
 	struct force forces[nforces];
 	
 	stime(fp, &time)
-	struct vector object[time.y - time.x]	// declares array of object structures with an amount of members
+	rewind(fin);
+	int nobj = (int) round(time.y - time.x);
+	struct vector object[nobj]	// declares array of object structures with an amount of members
 						// equal to range of time
 	
 	swindow(fin, window)		// reads window size (botleft, topright) from file into window
+	rewind(fin);
 	sforces(fin, nforces, forces);	//reads forces from file into array of force structures
+	rewind(fim);
 	
-	applyforces(forces, object, &time);
+	applyforces(nforces, nobj, object, forces, &time);
 	
 	strncpy(outs, argv[1]);
 	outs[15] = '\0';

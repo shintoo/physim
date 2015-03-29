@@ -46,7 +46,7 @@ void readval(FILE *fp, char *str, vals *var) {
 	while (c != EOF)		// eat rest of file after previous readval use
 		c = fgetc(fp);
 	fsetpos(fp, &strloc);
-	while (c != '\n') {		// read chars into temp char array
+	while (c != '\n') {	// read chars into temp char array
 		if (isdigit((c = getc(fp))) || c == '.')
 			temp[i++] = c;
 	}
@@ -61,7 +61,7 @@ void readval(FILE *fp, char *str, vals *var) {
 //reads numeric values on line line in file fp into vector structure vect
 void vectorread(FILE *fp, fpos_t *loc, struct vector *vect) {
 	char c, val1[32], val2[32];
-	int i = 0, xnegflag = 0, ynegflag = 0, nlct = 0;;
+	int i = 0, xnegflag = 0, ynegflag = 0, nlct = 0, decct = 0;
 
 	fsetpos(fp, loc);
 	i = 0;
@@ -92,6 +92,13 @@ void vectorread(FILE *fp, fpos_t *loc, struct vector *vect) {
 	else
 		val2[i++] = c;
 	while (isdigit(c = fgetc(fp)) || c == '.') {
+		if (c == '.') {
+			decct++;
+			if (decct > 1) {
+				puts("Error: reading value: multiple decimals");
+				exit(EXIT_FAILURE);
+			}
+		}
 		val2[i++] = c;
 	}
 	if (c != '>') {
@@ -111,19 +118,27 @@ void vectorread(FILE *fp, fpos_t *loc, struct vector *vect) {
 //reads nforces amount of forces into array of force forces[] from file fp
 void sforces(FILE *fp, const int nforces, struct force forces[]) {
 	fpos_t floc;
-	char temp[16], c;
-	int tempi;
+	char temp[16], time[16], c;
+	int tempct, tempi;
 
 	findstr(fp, "forces", &floc);
 	fsetpos(fp, &floc);
-	puts("sforces:");
 	for (int i = 0; i < nforces; i++) {
-//		tempi = 0;
-//		vectorread(fp, &floc, &(forces[i].cmpnt));
+		tempct = 0;
+		vectorread(fp, &floc, &(forces[i].cmpnt));
 		c = fgetc(fp);
-//		while ((c = fgetc(fp)) != '\n' && i < 15)
-//			temp[tempi++] = c;
-//		forces[i].time = atoi(temp);
+		
+		if (c == ' ') {
+			while ((c = fgetc(fp)) != '\n') {
+				if (isdigit(c))
+					temp[tempct++] = c;
+			}
+			for (tempi = 0; tempi < tempct; tempi++)
+				time[tempi] = temp[tempi];
+		}
+		time[tempi + 1] = '\0';
+		forces[i].time = atoi(time);
+	
 		while (c != '\n')
 			c = fgetc(fp);
 		c = fgetc(fp);
@@ -138,6 +153,11 @@ void swindow(FILE *fp, struct vector window[2]) {
 
 	findstr(fp, "window", &winloc);
 	fsetpos(fp, &winloc);
+
+	c = fgetc(fp);
+	printf("----%c----\n", c);
+	ungetc(c, fp);
+
 	for (int i = 0; i < 2; i++) {
 		vectorread(fp, &winloc, &(window[i]));
 		while (c != '\n')
@@ -153,13 +173,13 @@ void stime(FILE *fp, struct vector *time) {
 	findstr(fp, "time", &tloc);
 	vectorread(fp, &tloc, time);
 }
-/*
+
 //applies nforces amount of forces in array of force forces[] onto vectors in objects[], turning a force into a position using the newton's second law
-void applyforces(const unsigned int nforces, const force forces[], struct vector objects[], const double mass, const vector *time) {
+void applyforces(const int nforces, const int numob, struct vector object[numob], const struct force forces[nforces], const double mass, const struct vector *time) {
 	int frcct = 0;
 	struct vector acc, vel;
 	
-	for (int i = time->x; i <= time->y; i++) {
+	for (int i = time->x; i < time->y; i++) {
 		if (i == forces[frcct].time) {
 			acc.x += forces[frcct].cmpnt.x / mass;
 			acc.y += forces[frcct].cmpnt.y / mass;
@@ -169,6 +189,7 @@ void applyforces(const unsigned int nforces, const force forces[], struct vector
 		object[i].y += vel.y += acc.y;
 	}
 }
+/*
 //creates a visual 2d array of size window plotting the path of objects[] over time period time
 void writegraph(const vector objects[], const vector window[2], const vector *time) {
 
