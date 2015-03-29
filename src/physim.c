@@ -9,7 +9,7 @@ int findstr(FILE *fp, char *str, fpos_t *strloc) {
 	len = strlen(str);
 	while ((c = fgetc(fp)) != EOF) {
 		if (c == '#') {			// ignore comments
-			while (c != '\n')
+			while (c != '\n' && c != EOF)
 				c = fgetc(fp);
 			c = fgetc(fp);
 		}
@@ -46,7 +46,7 @@ void readval(FILE *fp, char *str, vals *var) {
 	while (c != EOF)		// eat rest of file after previous readval use
 		c = fgetc(fp);
 	fsetpos(fp, &strloc);
-	while (c != '\n') {	// read chars into temp char array
+	while (c != '\n' && c != '#') {	// read chars into temp char array
 		if (isdigit((c = getc(fp))) || c == '.')
 			temp[i++] = c;
 	}
@@ -61,11 +61,15 @@ void readval(FILE *fp, char *str, vals *var) {
 //reads numeric values on line line in file fp into vector structure vect
 void vectorread(FILE *fp, fpos_t *loc, struct vector *vect) {
 	char c, val1[32], val2[32];
-	int i = 0, xnegflag = 0, ynegflag = 0, nlct = 0, decct = 0;
+	int i = 0, nlct = 0, decct = 0;
 
 	fsetpos(fp, loc);
 	i = 0;
 	while ((c = fgetc(fp)) != EOF) {
+		if (c == '#') {
+			while (c != '\n' && c != EOF)
+				c = fgetc(fp);
+		}
 		if (c == '<')
 			break;
 	}
@@ -74,10 +78,8 @@ void vectorread(FILE *fp, fpos_t *loc, struct vector *vect) {
 		"Error ID: 74\n");
 		exit (EXIT_FAILURE);
 	}
-	if ((c = fgetc(fp)) == '-')
-		xnegflag = 1;
-	else
-		val1[i++] = c;
+	c = fgetc(fp);
+	val1[i++] = c;
 	while (isdigit(c = fgetc(fp)) || c == '.')
 		val1[i++] = c;
 	if (c != ',') {
@@ -87,9 +89,7 @@ void vectorread(FILE *fp, fpos_t *loc, struct vector *vect) {
 	}
 	val1[i] = '\0';
 	i = 0;
-	if ((c = getc(fp)) == '-')
-		ynegflag = 1;
-	else
+	c = fgetc(fp);
 		val2[i++] = c;
 	while (isdigit(c = fgetc(fp)) || c == '.') {
 		if (c == '.') {
@@ -106,13 +106,9 @@ void vectorread(FILE *fp, fpos_t *loc, struct vector *vect) {
 		"Error ID: 96\n");
 		exit(EXIT_FAILURE);
 	}
-	val2[++i] = '\0';
+	val2[i] = '\0';
 	vect->x = atof(val1);
 	vect->y = atof(val2);
-	if (xnegflag == 1)
-		vect->x *= -1;
-	if (ynegflag == 1)
-		vect->y *= -1;
 }
 
 //reads nforces amount of forces into array of force forces[] from file fp
@@ -129,12 +125,15 @@ void sforces(FILE *fp, const int nforces, struct force forces[]) {
 		c = fgetc(fp);
 		
 		if (c == ' ') {
-			while ((c = fgetc(fp)) != '\n') {
+			while ((c = fgetc(fp)) != '\n' && c != '#') {
 				if (isdigit(c))
 					temp[tempct++] = c;
 			}
 			for (tempi = 0; tempi < tempct; tempi++)
 				time[tempi] = temp[tempi];
+		} else {
+			printf("Error: expecting space before time: use format <x,y> t\n");
+			exit(EXIT_FAILURE);
 		}
 		time[tempi + 1] = '\0';
 		forces[i].time = atoi(time);
@@ -153,10 +152,6 @@ void swindow(FILE *fp, struct vector window[2]) {
 
 	findstr(fp, "window", &winloc);
 	fsetpos(fp, &winloc);
-
-	c = fgetc(fp);
-	printf("----%c----\n", c);
-	ungetc(c, fp);
 
 	for (int i = 0; i < 2; i++) {
 		vectorread(fp, &winloc, &(window[i]));
@@ -179,7 +174,7 @@ void applyforces(const int nforces, const int numob, struct vector object[numob]
 	int frcct = 0;
 	struct vector acc, vel;
 	
-	for (int i = time->x; i < time->y; i++) {
+	for (int i = time->x; i <= time->y; i++) {
 		if (i == forces[frcct].time) {
 			acc.x += forces[frcct].cmpnt.x / mass;
 			acc.y += forces[frcct].cmpnt.y / mass;
