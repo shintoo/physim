@@ -24,7 +24,7 @@
 #include <math.h>
 #include "physim.c"
 
-int main(int argc, int *argv[]) {
+int main(int argc, char *argv[]) {
 	if (argc != 2) {
 		printf("usage: %s <file>", argv[0]);
 		exit(EXIT_FAILURE);
@@ -40,24 +40,32 @@ int main(int argc, int *argv[]) {
 	union vals nfms;
 	struct vector time;
 	struct vector window[2];
+	
 	readval(fin, "forces", &nfms);
 	rewind(fin)l
 	nforces = nfms.intgr;
 	readval(fin, "mass", &nfms);
 	rewind(fin);
 	mass = nfms.mass;
+	
 	struct force forces[nforces];
+	
 	stime(fp, &time)
 	struct vector object[time.y - time.x]	// declares array of object structures with an amount of members
 						// equal to range of time
+	
 	swindow(fin, window)		// reads window size (botleft, topright) from file into window
 	sforces(fin, nforces, forces);	//reads forces from file into array of force structures
+	
 	applyforces(forces, object, &time);
+	
 	strncpy(outs, argv[1]);
 	outs[15] = '\0';
 	strcat(outs, ".phs");
 	fopen(outs, "w");
+	
 	writegraph(fout, object, window, &time);
+	
 	fclose(fin);
 	fclose(fout);
 	return 0;
