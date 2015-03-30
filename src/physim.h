@@ -20,4 +20,4 @@ void sforces(FILE *fp, const int nforces, struct force forces[]);
 void swindow(FILE *fp, struct vector window[2]);
 void stime(FILE *fp, struct vector *time);
 void applyforces(const int nforces, const int numob, struct vector object[numob], const struct force forces[nforces], const double mass, const struct vector *time);
-void writegraph(FILE * fp, const struct vector objects[], const struct vector window[2], const struct vector *time);
+void writegraph(FILE * fp, const int nobj, const struct vector object[nobj], const struct vector window[2], const struct vector *time);

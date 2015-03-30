@@ -1,26 +1,26 @@
-/* Physim: 2D vector-force physics simulator
+/** Physim: 2D single-object physics simulator
 *	The purpose of this program is to create a
-*	parametric graph in which x(t) and y(t)
-*	are based off of forces applied to an
-*	object with mass, reading the mass,
-*	forces, time range, and window range
-*	from an easily written file.
-* ------------------------------------------------
+*	graph in which x(t) and y(t) are based off
+*	of forces applied to an object with mass,
+*	reading the mass, forces, time range, and
+*	window range from an easily written file.
+*
+*-------------------------------------------------
+*
 * TODO:
-*	- fix what doesnt work
-*		- vectorread()
-*		- sforces(), swindow(), stime(), applyforces
-*	- write writegraph()
-*	- include initial position and velocity options
-*	- include "auto" option for window
-*	- include time-interval forces, e.g. "<10,21> 0-200" or
-*					     "<0,-20> always"
-*	- thorough error handling and reporting
+*	- fix writegraph()
+*	- allow for initial position and velocity
+*	- allow for "auto" option for window
+*	- allow for time-interval force application, e.g.
+*		- <10,21> 0-30
+*		- <0,-20> always
+*	- thorough error handling
 */
-
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
 #include <math.h>
 #include "physim.c"
 
@@ -34,43 +34,44 @@ int main(int argc, char *argv[]) {
 		printf("%s: error opening file %s", argv[0], argv[1]);
 		exit(EXIT_FAILURE);
 	}
-	char outs[20];
-	int nforces;
-	double mass;
-	union vals nfms;
-	struct vector time;
-	struct vector window[2];
-	
-	readval(fin, "forces", &nfms);
-	rewind(fin)l
+	char outs[20];				// output file name storage
+	int nforces, nobj, obji;		// num of forces, objects, object index
+	double mass;				// mass of object
+	union vals nfms;			// integer or double (nforces, mass)
+	struct vector time;			// time range
+	struct vector window[2];		// window range
+
+	readval(fin, "forces", &nfms);		// read in number of forces
+	rewind(fin);
 	nforces = nfms.intgr;
-	readval(fin, "mass", &nfms);
+	
+	readval(fin, "mass", &nfms);		// read in object mass
 	rewind(fin);
-	mass = nfms.mass;
-	
-	struct force forces[nforces];
-	
-	stime(fp, &time)
+	mass = nfms.dbl;
+
+	stime(fin, &time);			// read in time range
 	rewind(fin);
-	int nobj = (int) round(time.y - time.x);
-	struct vector object[nobj]	// declares array of object structures with an amount of members
-						// equal to range of time
-	
-	swindow(fin, window)		// reads window size (botleft, topright) from file into window
+
+	swindow(fin, window);			// read in window range
 	rewind(fin);
-	sforces(fin, nforces, forces);	//reads forces from file into array of force structures
-	rewind(fim);
 	
-	applyforces(nforces, nobj, object, forces, &time);
-	
-	strncpy(outs, argv[1]);
+	struct force forces[nforces];		// build forces
+	sforces(fin, nforces, forces);
+	rewind(fin);
+
+	nobj = (int) round(time.y - time.x);	// build object
+	struct vector object[nobj];
+
+	applyforces(nforces, nobj,  object, 	// apply forces to object
+		    forces, mass, &time);
+
+	strcpy(outs, argv[1]);			// open output file
 	outs[15] = '\0';
-	strcat(outs, ".phs");
-	fopen(outs, "w");
+	strcat(outs, ".ps");
+	fout = fopen(outs, "w");
+
+	writegraph(fout, nobj, object, 		// create and write
+		   window, &time);		// graph to output file
 	
-	writegraph(fout, object, window, &time);
-	
-	fclose(fin);
-	fclose(fout);
 	return 0;
 }
