@@ -5,9 +5,7 @@ A parametric force application simulator
 physim file
 
 ##building physim
-compile with
-
-gcc -std=c11 main.c -o physim -lm
+Simply run *sh compile*, and an executable named *physim* will be created.
 
 ##description
 The purpose  of this program is to graph the position of an object with mass over a time interval in which various forces are applied.
