@@ -58,9 +58,13 @@ int main(int argc, char *argv[]) {
 	struct force forces[nforces];		// build forces
 	sforces(fin, nforces, forces);
 	rewind(fin);
+	for (int i = 0; i < nforces; i++)
+		printf("<%f,%f,> %d\n", forces[i].cmpnt.x, forces[i].cmpnt.y, forces[i].time);
 
 	nobj = (int) round(time.y - time.x);	// build object
 	struct vector object[nobj];
+	
+	printf("object: %d\n", nobj);
 
 	applyforces(nforces, nobj,  object, 	// apply forces to object
 		    forces, mass, &time);

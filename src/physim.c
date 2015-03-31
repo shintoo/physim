@@ -145,7 +145,7 @@ void sforces(FILE *fp, const int nforces, struct force forces[]) {
 	}
 }
 
-//may be replaced by two vectorreads in main()
+// reads in the window range
 void swindow(FILE *fp, struct vector window[2]) {
 	fpos_t winloc;
 	char c;
@@ -166,7 +166,7 @@ void swindow(FILE *fp, struct vector window[2]) {
 	}
 }
 
-//may be replaced by a vectorread in main()
+// reads in the time range
 void stime(FILE *fp, struct vector *time) {
 	fpos_t tloc;
 	findstr(fp, "time", &tloc);
@@ -179,15 +179,19 @@ void applyforces(const int nforces, const int numob, struct vector object[numob]
 	struct vector acc = {0,0}, vel = {0,0};			// initial values
 	int obji = 0;						// object index
 
+	// something wrong going on in here
+
 	for (int i = time->x; i < time->y; i++) {
-		obji = i - ((int) time->x);			// start at time->x, increment
+		obji = i - time->x;			// start at time->x, increment
+
 		if (i == forces[frcct].time) {
-			acc.x += forces[frcct].cmpnt.x / mass;	// apply force to acc
-			acc.y += forces[frcct].cmpnt.y / mass;	//
+			acc.y += forces[frcct].cmpnt.y / mass;	// apply force to acc
+			acc.x += forces[frcct].cmpnt.x / mass;	//
 			++frcct;				// load next force
 		}
-		object[obji].x += vel.x += acc.x;		// apply acc to object
-		object[obji].y += vel.y += acc.y;		//
+		object[obji].y += vel.y += acc.y;		// apply acc to object
+		object[obji].x += vel.x += acc.x;		//
+		printf("t: %d: <%f,%f>\n", obji, object[obji].x, object[obji].y);
 	}
 }
 
@@ -198,34 +202,34 @@ void writegraph(FILE *fp, const int nobj, const struct vector object[nobj], cons
 	int obji;
 
 	xsize = abs(round(window[1].x - window[0].x)) + 1;
-	ysize = abs(round(window[1].y - window[0].x));
-	printf("ysize: %d\nxsize: %d\n", ysize, xsize);	
+	ysize = abs(round(window[1].y - window[0].y));	
 	char graph[ysize][xsize];
 	
 	for (y = 0; y < ysize; y++) {
 		for (x = 0; x < xsize; x++)
 			graph[y][x] = '.';
-		graph[y][61] = '\0';
+		graph[y][xsize] = '\0';
+		printf("%d:\t", y);
+		puts(graph[y]);
 	}
+///*
 	for (t = time->x; t < time->y; t++) {
 		obji = t - time->x;
 		x = (int) object[obji].x;
 		y = (int) object[obji].y;
-		graph[y][x] = 'x';
+		printf("obji: %d: <%d,%d>\n", obji, x, y);
+//		graph[y][x] = 'x'; 		// uncomment when applyforces() is fixed
 		obji++;
 	}
-
+//*/
 	puts("------------");
-	puts(graph[ysize - 1]);
-	fputs(graph[0], fp);
-	fputc('\n', fp);
-	fputs(graph[25], fp);
-	fputc('\n', fp);
-	fputs(graph[59], fp);
-	printf("\n%f %f\n", time->x, time->y);
+	printf("\ntime: <%f,%f>\n", time->x, time->y);
 	
-//	for (y = ysize - 1; y > 0; y++) {
-//		fputs(graph[y], stdout);
-//		fputc('\n', stdout);
-//	}
+/*	for (y = ysize - 1; y > 0; y--) {
+		printf("%d\n", y);
+		fputs(graph[y], fp);
+		fputc('\n', fp);
+	}
+*/
 }
+
