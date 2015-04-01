@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
 		printf("%s: error opening file %s", argv[0], argv[1]);
 		exit(EXIT_FAILURE);
 	}
-	char outs[20];				// output file name storage
+	char outs[30];				// output file name storage
 	int nforces, nobj, obji;		// num of forces, objects, object index
 	double mass;				// mass of object
 	union vals nfms;			// integer or double (nforces, mass)
@@ -70,8 +70,8 @@ int main(int argc, char *argv[]) {
 		    forces, mass, &time);
 
 	strcpy(outs, argv[1]);			// open output file
-	outs[15] = '\0';
-	strcat(outs, ".ps");
+	outs[22] = '\0';
+	strcat(outs, "_physim");
 	fout = fopen(outs, "w");
 
 	writegraph(fout, nobj, object, 		// create and write

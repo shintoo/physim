@@ -207,29 +207,30 @@ void writegraph(FILE *fp, const int nobj, const struct vector object[nobj], cons
 	
 	for (y = 0; y < ysize; y++) {
 		for (x = 0; x < xsize; x++)
-			graph[y][x] = '.';
-		graph[y][xsize] = '\0';
+			graph[y][x] = '-';
+		graph[y][xsize - 1] = '\0';
 		printf("%d:\t", y);
 		puts(graph[y]);
 	}
 ///*
+	y = 0;
 	for (t = time->x; t < time->y; t++) {
 		obji = t - time->x;
 		x = (int) object[obji].x;
 		y = (int) object[obji].y;
 		printf("obji: %d: <%d,%d>\n", obji, x, y);
-//		graph[y][x] = 'x'; 		// uncomment when applyforces() is fixed
+		graph[y][x] = 'X'; 		// uncomment when applyforces() is fixed
 		obji++;
 	}
 //*/
 	puts("------------");
 	printf("\ntime: <%f,%f>\n", time->x, time->y);
 	
-/*	for (y = ysize - 1; y > 0; y--) {
+	for (y = ysize - 1; y > 0; y--) {
 		printf("%d\n", y);
 		fputs(graph[y], fp);
-		fputc('\n', fp);
+		fprintf(fp, "%d\n", y);
 	}
-*/
+
 }
 
