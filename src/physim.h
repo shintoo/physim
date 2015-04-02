@@ -1,23 +1,23 @@
-struct vector {
+typedef struct vector {
 	double x;
 	double y;
-};
+} Vector;
 
-struct force {
+typedef struct force {
 	struct vector cmpnt;
 	int time;
-};
+} Force;
 
 typedef union vals{
 	int intgr;
 	double dbl;
 } vals;
 
-int findstr(FILE *fp, char *str, fpos_t *strloc);
-void readval(FILE *fp, char *str, vals *var);
-void vectorread(FILE *fp, fpos_t *loc, struct vector *vect);
-void sforces(FILE *fp, const int nforces, struct force forces[]);
-void swindow(FILE *fp, struct vector window[2]);
-void stime(FILE *fp, struct vector *time);
-void applyforces(const int nforces, const int numob, struct vector object[numob], const struct force forces[nforces], const double mass, const struct vector *time);
-void writegraph(FILE * fp, const int nobj, const struct vector object[nobj], const struct vector window[2], const struct vector *time);
+int FindString(FILE *fp, char *str, fpos_t *strloc);
+void ReadValue(FILE *fp, char *str, vals *var);
+void ReadVector(FILE *fp, fpos_t *loc, Vector *vect);
+void ReadForces(FILE *fp, const int NumForces, Force forces[]);
+void ReadWindow(FILE *fp, Vector window[2]);
+void ReadTime(FILE *fp, Vector *time);
+void ApplyForces(const int NumForces, const int NumObj, Vector object[NumObj], const Force forces[NumForces], const double mass, const Vector *time);
+void WriteGraph(FILE *fp, const int NumObj, const Vector object[NumObj], const Vector window[2], const Vector *time);

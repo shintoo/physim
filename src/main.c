@@ -35,38 +35,39 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 	char outs[30];				// output file name storage
-	int nforces, nobj, obji;		// num of forces, objects, object index
+	int NumForces, NumObj, ObjInd;		// num of forces, objects, object index
 	double mass;				// mass of object
-	union vals nfms;			// integer or double (nforces, mass)
+	union vals data;			// integer or double (nforces, mass)
 	struct vector time;			// time range
 	struct vector window[2];		// window range
 
-	readval(fin, "forces", &nfms);		// read in number of forces
+	ReadValue(fin, "forces", &data);		// read in number of forces
 	rewind(fin);
-	nforces = nfms.intgr;
+	NumForces = data.intgr;
 	
-	readval(fin, "mass", &nfms);		// read in object mass
+	ReadValue(fin, "mass", &data);		// read in object mass
 	rewind(fin);
-	mass = nfms.dbl;
+	mass = data.dbl;
 
-	stime(fin, &time);			// read in time range
+	ReadTime(fin, &time);			// read in time range
 	rewind(fin);
 
-	swindow(fin, window);			// read in window range
+	ReadWindow(fin, window);			// read in window range
 	rewind(fin);
 	
-	struct force forces[nforces];		// build forces
-	sforces(fin, nforces, forces);
+	struct force forces[NumForces];		// build forces
+	ReadForces(fin, NumForces, forces);
 	rewind(fin);
-	for (int i = 0; i < nforces; i++)
+	
+	for (int i = 0; i < NumForces; i++)
 		printf("<%f,%f,> %d\n", forces[i].cmpnt.x, forces[i].cmpnt.y, forces[i].time);
 
-	nobj = (int) round(time.y - time.x);	// build object
-	struct vector object[nobj];
+	NumObj = (int) round(time.y - time.x);	// build object
+	struct vector object[NumObj];
 	
-	printf("object: %d\n", nobj);
+	printf("object: %d\n", NumObj);
 
-	applyforces(nforces, nobj,  object, 	// apply forces to object
+	ApplyForces(NumForces, NumObj,  object, 	// apply forces to object
 		    forces, mass, &time);
 
 	strcpy(outs, argv[1]);			// open output file
@@ -74,7 +75,7 @@ int main(int argc, char *argv[]) {
 	strcat(outs, "_physim");
 	fout = fopen(outs, "w");
 
-	writegraph(fout, nobj, object, 		// create and write
+	WriteGraph(fout, NumObj, object, 		// create and write
 		   window, &time);		// graph to output file
 	
 	return 0;

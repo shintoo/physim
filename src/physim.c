@@ -2,7 +2,7 @@
 
 
 //finds string str in file fp, returns location
-int findstr(FILE *fp, char *str, fpos_t *strloc) {
+int FindString(FILE *fp, char *str, fpos_t *strloc) {
 	char c;
 	int len = 0, i = 0, ret_val = 1;			// ret_val: 0 = notfound, 1 = found
 
@@ -35,11 +35,11 @@ int findstr(FILE *fp, char *str, fpos_t *strloc) {
 }
 
 //reads either double type for mass or integer type for nforces from file fp
-void readval(FILE *fp, char *str, vals *var) {
+void ReadValue(FILE *fp, char *str, vals *var) {
 	int i = 0;
 	char temp[64], c;
 	fpos_t strloc;
-	if (findstr(fp, str, &strloc) != 0) {
+	if (FindString(fp, str, &strloc) != 0) {
 		printf("Error: missing argument: %s\n", str);
 		exit(EXIT_FAILURE);
 	}
@@ -59,7 +59,7 @@ void readval(FILE *fp, char *str, vals *var) {
 }
 
 //reads numeric values on line line in file fp into vector structure vect
-void vectorread(FILE *fp, fpos_t *loc, struct vector *vect) {
+void ReadVector(FILE *fp, fpos_t *loc, Vector *vect) {
 	char c, val1[32], val2[32];
 	int i = 0, nlct = 0, decct = 0;				// newline count, decimal count
 
@@ -112,16 +112,16 @@ void vectorread(FILE *fp, fpos_t *loc, struct vector *vect) {
 }
 
 //reads nforces amount of forces into array of force forces[] from file fp
-void sforces(FILE *fp, const int nforces, struct force forces[]) {
+void ReadForces(FILE *fp, const int NumForces, Force forces[]) {
 	fpos_t floc;
 	char temp[16], time[16], c;
 	int tempct, tempi;
 
-	findstr(fp, "forces", &floc);
+	FindString(fp, "forces", &floc);
 	fsetpos(fp, &floc);					// start reading at "forces"
-	for (int i = 0; i < nforces; i++) {			// do for each force
+	for (int i = 0; i < NumForces; i++) {			// do for each force
 		tempct = 0;
-		vectorread(fp, &floc, &(forces[i].cmpnt));
+		ReadVector(fp, &floc, &(forces[i].cmpnt));
 		c = fgetc(fp);
 		
 		if (c == ' ' || c == '\t') {			// read time applied
@@ -146,15 +146,15 @@ void sforces(FILE *fp, const int nforces, struct force forces[]) {
 }
 
 // reads in the window range
-void swindow(FILE *fp, struct vector window[2]) {
+void ReadWindow(FILE *fp, Vector window[2]) {
 	fpos_t winloc;
 	char c;
 
-	findstr(fp, "window", &winloc);
+	FindString(fp, "window", &winloc);
 	fsetpos(fp, &winloc);
 
 	for (int i = 0; i < 2; i++) {				// read bottom left & top right
-		vectorread(fp, &winloc, &(window[i]));
+		ReadVector(fp, &winloc, &(window[i]));
 		while (c != '\n')
 			c = fgetc(fp);
 		c = fgetc(fp);
@@ -167,14 +167,15 @@ void swindow(FILE *fp, struct vector window[2]) {
 }
 
 // reads in the time range
-void stime(FILE *fp, struct vector *time) {
+void ReadTime(FILE *fp, Vector *time) {
 	fpos_t tloc;
-	findstr(fp, "time", &tloc);
-	vectorread(fp, &tloc, time);
+	
+	FindString(fp, "time", &tloc);
+	ReadVector(fp, &tloc, time);
 }
 
 //applies nforces amount of forces in array of force forces[] onto vectors in objects[], turning a force into a position using the newton's second law
-void applyforces(const int nforces, const int numob, struct vector object[numob], const struct force forces[nforces], const double mass, const struct vector *time) {
+void ApplyForces(const int NumForces, const int NumObj, Vector object[NumObj], const Force forces[NumForces], const double mass, const Vector *time) {
 	int frcct = 0;						// force in queue
 	struct vector acc = {0,0}, vel = {0,0};			// initial values
 	int obji = 0;						// object index
@@ -196,7 +197,7 @@ void applyforces(const int nforces, const int numob, struct vector object[numob]
 }
 
 //creates a visual 2d array of size window plotting the path of objects[] over time period time
-void writegraph(FILE *fp, const int nobj, const struct vector object[nobj], const struct vector window[2], const struct vector *time) {
+void WriteGraph(FILE *fp, const int NumObj, const Vector object[NumObj], const Vector window[2], const Vector *time) {
 	int xsize, ysize;
 	int x, y, t;
 	int obji;
@@ -219,7 +220,8 @@ void writegraph(FILE *fp, const int nobj, const struct vector object[nobj], cons
 		x = (int) object[obji].x;
 		y = (int) object[obji].y;
 		printf("obji: %d: <%d,%d>\n", obji, x, y);
-		graph[y][x] = 'X'; 		// uncomment when applyforces() is fixed
+//		if (!((y < window[0].y || y > window[1].y) || (x < window[0].x || x > window[1].x)))	
+			graph[y][x] = 'X'; 		// uncomment when applyforces() is fixed
 		obji++;
 	}
 //*/
