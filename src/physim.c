@@ -51,7 +51,7 @@ void ReadValue(FILE *fp, char *str, vals *var) {
 			temp[i++] = c;
 	}
 	temp[i + 1] = '\0';					// make temp a string to convert
-	if (str[0] == 'f')					// for nforces
+	if (str[0] == 'f')					// for forces
 		var->intgr = atoi(temp);
 	if (str[0] == 'm')					// for mass
 		var->dbl =  atof(temp);
@@ -190,9 +190,6 @@ void ApplyForces(const int NumForces, const int NumObj, Vector object[NumObj], c
 		}
 		object[obji].y += vel.y += acc.y;		// apply acc to object
 		object[obji].x += vel.x += acc.x;		//
-		///
-		printf("t: %d: <%f,%f>\n", obji, object[obji].x, object[obji].y);
-		///
 	}
 }
 
@@ -211,47 +208,30 @@ void WriteGraph(FILE *fp, const int NumObj, const Vector object[NumObj], const i
 		for (x = 0; x < xsize; x++)
 			graph[y][x] = '-';
 		graph[y][xsize - 1] = '\0';
-		///
-		printf("%d:\t", y);
-		puts(graph[y]);
-		///
 	}
-///*
 	y = 0;
 	for (t = time->x; t < time->y; t++) {
 		obji = t - time->x;
 		x = (int) object[obji].x;
 		y = (int) object[obji].y;
-		///
-		printf("obji: %d: <%d,%d>\n", obji, x, y);
-		///
 		if (!((y < window[0].y || y > window[1].y) || (x < window[0].x || x > window[1].x))) {
 			if (t == forces[frcct].time) {
 				c = frcct + '0';
-				putchar(c);
 				graph[y][x] = c;
 				frcct++;
 			} else {
 				if (graph[y][x] == '-') {
-					graph[y][x] = 'X'; 	// uncomment when applyforces() is fixed
+					graph[y][x] = 'X';
 				}
 			}
 		}
 		obji++;
 	}
-//*/	///
-	puts("------------");
-	printf("\ntime: <%f,%f>\n", time->x, time->y);
-	///
-	for (y = ysize - 1; y >= 0; y--) {
-		//
-		printf("%d\n", y);
-		//
-//		fprintf(fp, "\n%d", y);
+	for (y = ysize - 1; y >= 0; y--) {			// y - axis
 		fputs(graph[y], fp);
 		fprintf(fp, "%d\n", y);
-	}
-/*	for (int i = 0; i < xsize; i++) {
+	}	
+/*	for (int i = 0; i < xsize; i++) {			// x - axis
 		fprintf(fp, "%d", i % 10);
 	}
 	fputc('\n', fp);

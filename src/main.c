@@ -59,13 +59,8 @@ int main(int argc, char *argv[]) {
 	ReadForces(fin, NumForces, forces);
 	rewind(fin);
 	
-	for (int i = 0; i < NumForces; i++)
-		printf("<%f,%f,> %d\n", forces[i].cmpnt.x, forces[i].cmpnt.y, forces[i].time);
-
 	NumObj = (int) round(time.y - time.x);	// build object
 	struct vector object[NumObj];
-	
-	printf("object: %d\n", NumObj);
 
 	ApplyForces(NumForces, NumObj,  object, // apply forces to object
 		    forces, mass, &time);
