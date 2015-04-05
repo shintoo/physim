@@ -40,6 +40,8 @@ int main(int argc, char *argv[]) {
 	union vals data;			// integer or double (nforces, mass)
 	struct vector time;			// time range
 	struct vector window[2];		// window range
+	
+	struct vector initVel, initPos;
 
 	ReadValue(fin, "forces", &data);		// read in number of forces
 	rewind(fin);
@@ -55,15 +57,22 @@ int main(int argc, char *argv[]) {
 	ReadWindow(fin, window);		// read in window range
 	rewind(fin);
 	
+	ReadInitials(fin, &initVel, &initPos);
+	rewind(fin);
+
+	printf("Initial velocity:\n\t<%f,%f>\nInitial position\n\t<%f,%f>\n",
+		initVel.x, initVel.y, initPos.x, initPos.y);
+	
 	struct force forces[NumForces];		// build forces
 	ReadForces(fin, NumForces, forces);
 	rewind(fin);
 	
 	NumObj = (int) round(time.y - time.x);	// build object
 	struct vector object[NumObj];
-
+	
 	ApplyForces(NumForces, NumObj,  object, // apply forces to object
-		    forces, mass, &time);
+		    forces, mass, &time,
+		    &initVel, &initPos);
 
 	strcpy(outs, argv[1]);			// open output file
 	outs[22] = '\0';

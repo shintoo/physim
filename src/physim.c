@@ -1,6 +1,5 @@
 #include "physim.h"
 
-
 //finds string str in file fp, returns location
 int FindString(FILE *fp, char *str, fpos_t *strloc) {
 	char c;
@@ -126,8 +125,9 @@ void ReadForces(FILE *fp, const int NumForces, Force forces[]) {
 		
 		if (c == ' ' || c == '\t') {			// read time applied
 			while ((c = fgetc(fp)) != '\n' && c != '#') {
-				if (isdigit(c))
+				if (isdigit(c)) {
 					temp[tempct++] = c;
+				}
 			}
 			for (tempi = 0; tempi < tempct; tempi++)
 				time[tempi] = temp[tempi];
@@ -174,15 +174,33 @@ void ReadTime(FILE *fp, Vector *time) {
 	ReadVector(fp, &tloc, time);
 }
 
+// reads in the initial velocity and initial acceleration
+void ReadInitials(FILE *fp, Vector *velocity, Vector *position) {
+	fpos_t vel, pos;
+
+	if (FindString(fp, "pos", &pos) == 0) {
+		ReadVector(fp, &pos, position);
+	}
+	rewind(fp);
+	if (FindString(fp, "vel", &vel) == 0) {
+		ReadVector(fp, &vel, velocity);
+	}
+}
+
 //applies nforces amount of forces in array of force forces[] onto vectors in objects[], turning a force into a position using the newton's second law
-void ApplyForces(const int NumForces, const int NumObj, Vector object[NumObj], const Force forces[NumForces], const double mass, const Vector *time) {
+void ApplyForces(const int NumForces, const int NumObj, Vector object[NumObj], const Force forces[NumForces], const double mass, const Vector *time, const Vector *initVel, const Vector *initPos) {
 	int frcct = 0;						// force in queue
-	struct vector acc = {0,0}, vel = {0,0};			// initial values
+	struct vector acc = {0,0};
+//	struct vector vel = {initVel->x, initVel->y};		// initial vel - not yet working
+	struct vector vel = {0,0};
 	int obji = 0;						// object index
 
+	object[obji].y = initPos->y;
+	object[obji].x = initPos->x;
 	for (int i = time->x; i < time->y; i++) {
-		obji = i - time->x;				// start at time->x, increment
-
+		obji = i - time->x + 1;				// start at time->x, increment	
+		object[obji].y = initPos->y;
+		object[obji].x = initPos->x;
 		if (i == forces[frcct].time) {
 			acc.y += forces[frcct].cmpnt.y / mass;	// apply force to acc
 			acc.x += forces[frcct].cmpnt.x / mass;	//
