@@ -180,10 +180,8 @@ void ApplyForces(const int NumForces, const int NumObj, Vector object[NumObj], c
 	struct vector acc = {0,0}, vel = {0,0};			// initial values
 	int obji = 0;						// object index
 
-	// something wrong going on in here
-
 	for (int i = time->x; i < time->y; i++) {
-		obji = i - time->x;			// start at time->x, increment
+		obji = i - time->x;				// start at time->x, increment
 
 		if (i == forces[frcct].time) {
 			acc.y += forces[frcct].cmpnt.y / mass;	// apply force to acc
@@ -192,26 +190,31 @@ void ApplyForces(const int NumForces, const int NumObj, Vector object[NumObj], c
 		}
 		object[obji].y += vel.y += acc.y;		// apply acc to object
 		object[obji].x += vel.x += acc.x;		//
+		///
 		printf("t: %d: <%f,%f>\n", obji, object[obji].x, object[obji].y);
+		///
 	}
 }
 
 //creates a visual 2d array of size window plotting the path of objects[] over time period time
-void WriteGraph(FILE *fp, const int NumObj, const Vector object[NumObj], const Vector window[2], const Vector *time) {
-	int xsize, ysize;
-	int x, y, t;
-	int obji;
+void WriteGraph(FILE *fp, const int NumObj, const Vector object[NumObj], const int NumForces, const Force forces[NumForces], const Vector window[2], const Vector *time) {
+	int xsize, ysize;					// size of graph
+	int x, y, t;						// position in x, y, time
+	int obji, frcct = 0;					// index for object
+	char c;
 
-	xsize = abs(round(window[1].x - window[0].x)) + 1;
+	xsize = abs(round(window[1].x - window[0].x)) + 1;	// +1 is for null character
 	ysize = abs(round(window[1].y - window[0].y));	
 	char graph[ysize][xsize];
 	
-	for (y = 0; y < ysize; y++) {
+	for (y = 0; y < ysize; y++) {				// initialize graph to empty
 		for (x = 0; x < xsize; x++)
 			graph[y][x] = '-';
 		graph[y][xsize - 1] = '\0';
+		///
 		printf("%d:\t", y);
 		puts(graph[y]);
+		///
 	}
 ///*
 	y = 0;
@@ -219,20 +222,42 @@ void WriteGraph(FILE *fp, const int NumObj, const Vector object[NumObj], const V
 		obji = t - time->x;
 		x = (int) object[obji].x;
 		y = (int) object[obji].y;
+		///
 		printf("obji: %d: <%d,%d>\n", obji, x, y);
-//		if (!((y < window[0].y || y > window[1].y) || (x < window[0].x || x > window[1].x)))	
-			graph[y][x] = 'X'; 		// uncomment when applyforces() is fixed
+		///
+		if (!((y < window[0].y || y > window[1].y) || (x < window[0].x || x > window[1].x))) {
+			if (t == forces[frcct].time) {
+				c = frcct + '0';
+				putchar(c);
+				graph[y][x] = c;
+				frcct++;
+			} else {
+				if (graph[y][x] == '-') {
+					graph[y][x] = 'X'; 	// uncomment when applyforces() is fixed
+				}
+			}
+		}
 		obji++;
 	}
-//*/
+//*/	///
 	puts("------------");
 	printf("\ntime: <%f,%f>\n", time->x, time->y);
-	
-	for (y = ysize - 1; y > 0; y--) {
+	///
+	for (y = ysize - 1; y >= 0; y--) {
+		//
 		printf("%d\n", y);
+		//
+//		fprintf(fp, "\n%d", y);
 		fputs(graph[y], fp);
 		fprintf(fp, "%d\n", y);
 	}
-
+/*	for (int i = 0; i < xsize; i++) {
+		fprintf(fp, "%d", i % 10);
+	}
+	fputc('\n', fp);
+	for (int i = 0; i < xsize; i++) {
+		fprintf(fp, "%d", (i % 10) / 10);
+	}
+*/
 }
 

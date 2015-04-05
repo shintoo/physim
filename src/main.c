@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
 	ReadTime(fin, &time);			// read in time range
 	rewind(fin);
 
-	ReadWindow(fin, window);			// read in window range
+	ReadWindow(fin, window);		// read in window range
 	rewind(fin);
 	
 	struct force forces[NumForces];		// build forces
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 	
 	printf("object: %d\n", NumObj);
 
-	ApplyForces(NumForces, NumObj,  object, 	// apply forces to object
+	ApplyForces(NumForces, NumObj,  object, // apply forces to object
 		    forces, mass, &time);
 
 	strcpy(outs, argv[1]);			// open output file
@@ -75,8 +75,10 @@ int main(int argc, char *argv[]) {
 	strcat(outs, "_physim");
 	fout = fopen(outs, "w");
 
-	WriteGraph(fout, NumObj, object, 		// create and write
+	WriteGraph(fout, NumObj, object,	// create and write
+		   NumForces, forces,
 		   window, &time);		// graph to output file
-	
+	fclose(fin);
+	fclose(fout);	
 	return 0;
 }

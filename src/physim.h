@@ -20,4 +20,4 @@ void ReadForces(FILE *fp, const int NumForces, Force forces[]);
 void ReadWindow(FILE *fp, Vector window[2]);
 void ReadTime(FILE *fp, Vector *time);
 void ApplyForces(const int NumForces, const int NumObj, Vector object[NumObj], const Force forces[NumForces], const double mass, const Vector *time);
-void WriteGraph(FILE *fp, const int NumObj, const Vector object[NumObj], const Vector window[2], const Vector *time);
+void WriteGraph(FILE *fp, const int NumObj, const Vector object[NumObj], const int NumForces, const Force forces[NumForces], const Vector window[2], const Vector *time);
